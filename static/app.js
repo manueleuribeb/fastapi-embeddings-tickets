@@ -1,3 +1,6 @@
+// ===============================
+// Búsqueda de tickets por embeddings
+// ===============================
 async function searchTickets() {
   const queryEl = document.getElementById("query");
   const resultsDiv = document.getElementById("results");
@@ -18,7 +21,7 @@ async function searchTickets() {
       },
       body: JSON.stringify({
         query: query,
-        top_k: 3,
+        top_k: 5, // número de tickets similares a mostrar
       }),
     });
 
@@ -35,24 +38,47 @@ async function searchTickets() {
       return;
     }
 
-    const list = document.createElement("ul");
+    // Crear tabla de resultados
+    const table = document.createElement("table");
+    table.classList.add("results-table");
+
+    const thead = document.createElement("thead");
+    thead.innerHTML = `
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Categoría</th>
+        <th>Score</th>
+        <th>Descripción</th>
+      </tr>
+    `;
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
 
     data.results.forEach((item) => {
-      const li = document.createElement("li");
-      li.innerHTML =
-        `<strong>[${item.id}] ${item.title}</strong> ` +
-        `(score: ${item.score.toFixed(3)})<br/>` +
-        `${item.description}`;
-      list.appendChild(li);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${item.id}</td>
+        <td>${item.title}</td>
+        <td>${item.category || "-"}</td>
+        <td>${item.score.toFixed(3)}</td>
+        <td>${item.description}</td>
+      `;
+      tbody.appendChild(tr);
     });
 
-    resultsDiv.appendChild(list);
+    table.appendChild(tbody);
+    resultsDiv.appendChild(table);
   } catch (err) {
     console.error(err);
     resultsDiv.textContent = "Ocurrió un error al llamar a la API.";
   }
 }
 
+// ===============================
+// Generar respuesta con Groq (LLM)
+// ===============================
 async function answerWithGroq() {
   const queryEl = document.getElementById("query");
   const resultsDiv = document.getElementById("results");
@@ -75,32 +101,59 @@ async function answerWithGroq() {
       },
       body: JSON.stringify({
         query: query,
-        top_k: 3,
+        top_k: 5,
       }),
     });
 
     const data = await response.json();
+    console.log("GROQ DATA:", data);
 
     if (data.error) {
       answerDiv.textContent = data.error;
       return;
     }
 
-    // Mostrar respuesta del LLM
-    answerDiv.textContent = data.answer || "No se recibió respuesta del modelo.";
+    // Mostrar respuesta del LLM (Markdown → HTML)
+    if (data.answer) {
+      // marked viene del script CDN en index.html
+      answerDiv.innerHTML = marked.parse(data.answer);
+    } else {
+      answerDiv.textContent = "No se recibió respuesta del modelo.";
+    }
 
-    // Mostrar también los tickets usados
+    // Tabla con tickets usados como contexto
     if (data.similar_tickets && data.similar_tickets.length > 0) {
-      const list = document.createElement("ul");
+      const table = document.createElement("table");
+      table.classList.add("results-table");
+
+      const thead = document.createElement("thead");
+      thead.innerHTML = `
+        <tr>
+          <th>ID</th>
+          <th>Título</th>
+          <th>Categoría</th>
+          <th>Score</th>
+          <th>Descripción</th>
+        </tr>
+      `;
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+
       data.similar_tickets.forEach((item) => {
-        const li = document.createElement("li");
-        li.innerHTML =
-          `<strong>[${item.id}] ${item.title}</strong> ` +
-          `(score: ${item.score.toFixed(3)})<br/>` +
-          `${item.description}`;
-        list.appendChild(li);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td>${item.title}</td>
+          <td>${item.category || "-"}</td>
+          <td>${item.score.toFixed(3)}</td>
+          <td>${item.description}</td>
+        `;
+        tbody.appendChild(tr);
       });
-      resultsDiv.appendChild(list);
+
+      table.appendChild(tbody);
+      resultsDiv.appendChild(table);
     }
   } catch (err) {
     console.error(err);
@@ -108,6 +161,9 @@ async function answerWithGroq() {
   }
 }
 
+// ===============================
+// Registro de eventos al cargar la página
+// ===============================
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("searchBtn");
   btn.addEventListener("click", searchTickets);
