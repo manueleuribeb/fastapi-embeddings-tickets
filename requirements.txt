@@ -1,5 +1,8 @@
 fastapi
-uvicorn
+uvicorn==0.24.0
 sentence-transformers
 groq
 python-dotenv
+requests
+uvicorn
+pydantic
