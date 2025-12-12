@@ -1,47 +1,41 @@
-/* Fuente opcional (Inter). Si no tienes acceso a Google Fonts, puedes comentar la línea siguiente */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap");
-/* Alternativa:
 @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600&display=swap");
-*/
-
-:root {
-  --bg: #f5f5f5;
-  --text: #333;
-  --text-sub: #444;
-  --primary: #1976d2;
-  --primary-hover: #0f5ca8;
-  --border: #ddd;
-  --card-bg: #ffffff;
-}
-
-* {
-  box-sizing: border-box;
-}
 
 body {
-  /* Si activaste Inter arriba, usa 'Inter'; si prefieres Nunito, cámbialo aquí */
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  max-width: 960px;
+  font-family: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  max-width: 900px;
   margin: 40px auto;
   padding: 0 20px;
-  background-color: var(--bg);
-  color: var(--text);
-  line-height: 1.5;
+  background-color: #f5f5f5;
+  color: #333;
 }
 
 h1 {
   text-align: center;
-  color: var(--text);
-  margin: 0 0 24px 0;
+  color: #333;
+  margin-bottom: 24px;
 }
 
-h3 {
+h2 {
   margin-top: 30px;
-  color: var(--text-sub);
+  color: #444;
+  margin-bottom: 12px;
+}
+
+.container {
+  display: block;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 label {
-  font-weight: 600;
+  font-weight: bold;
   display: block;
   margin-bottom: 8px;
 }
@@ -51,114 +45,67 @@ textarea {
   padding: 10px;
   font-size: 14px;
   border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 4px;
+  box-sizing: border-box;
   resize: vertical;
-  background: #fff;
+  background-color: #fafafa;
 }
 
 .actions {
   margin-top: 12px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
 }
 
 button {
-  padding: 10px 16px;
+  margin-top: 8px;
+  margin-right: 8px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 6px;
-  background-color: var(--primary);
+  border-radius: 4px;
+  background-color: #1976d2;
   color: white;
   font-size: 14px;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: var(--primary-hover);
+  background-color: #0f5ca8;
 }
 
 button:disabled {
   opacity: 0.6;
-  cursor: not-allowed;
+  cursor: default;
 }
 
-/* Contenedor de resultados */
-#results {
-  min-height: 60px;
-}
+/* Tablas (tickets similares y respuesta Groq) */
 
-/* Tabla de resultados (búsqueda y tickets similares de Groq) */
-.results-table {
+.table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
-  background-color: var(--card-bg);
+  background-color: #ffffff;
 }
 
-.results-table th,
-.results-table td {
-  border: 1px solid var(--border);
-  padding: 8px;
+.table th,
+.table td {
+  border: 1px solid #ddd;
+  padding: 8px 10px;
   font-size: 14px;
-  vertical-align: top;
 }
 
-.results-table th {
+.table th {
   background-color: #e3f2fd;
   text-align: left;
+  font-weight: 600;
 }
 
-.results-table tr:nth-child(even) {
+.table tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-/* Respuesta sugerida por Groq */
-#groqAnswer {
-  margin-top: 10px;
-}
+/* Mensajes dentro de los contenedores */
 
-/* Bloque de texto para la respuesta del LLM (tabla Markdown) */
-.groq-output {
-  padding: 12px;
-  background-color: var(--card-bg);
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  white-space: pre-wrap;
-  font-family: "Courier New", monospace;
+#similar-tickets-table p,
+#groq-answer-table p {
+  margin: 8px 0 0;
   font-size: 14px;
-}
-
-/* Secciones (consulta, resultados, respuesta) */
-.query-section,
-.results-section,
-.groq-section {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 18px;
-}
-
-/* Spinner accesible (usado por app.js con aria-busy) */
-.spinner {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 2px solid #eee;
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  vertical-align: middle;
-  margin-right: 6px;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Mejoras de accesibilidad */
-[aria-busy="true"] {
-  opacity: 0.85;
 }

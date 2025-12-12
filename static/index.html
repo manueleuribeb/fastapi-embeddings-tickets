@@ -1,44 +1,39 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Buscador de tickets</title>
-
-  <!-- Hoja de estilos -->
+  <meta charset="UTF-8" />
+  <title>Buscador de tickets similares</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
-  <header>
-    <h1>Buscador de tickets similares</h1>
-  </header>
+  <main class="container">
+    <h1>Soporte con Embeddings y Groq</h1>
 
-  <main>
-    <section aria-labelledby="query-label" class="query-section">
-      <label id="query-label" for="query">Describe tu problema:</label>
+    <section class="card">
+      <label for="query">Describe el problema del usuario</label>
       <textarea
         id="query"
-        placeholder="Ej.: No puedo iniciar sesión en la app"
+        rows="4"
+        placeholder="Ejemplo: No puedo iniciar sesión en la plataforma…"
       ></textarea>
 
       <div class="actions">
-        <button id="searchBtn">Buscar tickets similares</button>
-        <button id="answerBtn">Generar respuesta (stream) con Groq</button>
+        <button id="btn-search">Buscar tickets similares</button>
+        <button id="btn-groq">Generar respuesta con Groq</button>
       </div>
     </section>
 
-    <section aria-labelledby="results-title" class="results-section">
-      <h3 id="results-title">Resultados</h3>
-      <div id="results" aria-live="polite"></div>
+    <section class="card">
+      <h2>Tickets similares</h2>
+      <div id="similar-tickets-table"></div>
     </section>
 
-    <section aria-labelledby="groq-title" class="groq-section">
-      <h3 id="groq-title">Respuesta sugerida por Groq</h3>
-      <div id="groqAnswer" aria-live="polite"></div>
+    <section class="card">
+      <h2>Respuesta generada</h2>
+      <div id="groq-answer-table"></div>
     </section>
   </main>
 
-  <!-- Script principal -->
   <script src="/static/app.js"></script>
 </body>
 </html>
