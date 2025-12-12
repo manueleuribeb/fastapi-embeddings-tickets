@@ -1,175 +1,154 @@
-// ===============================
-// Búsqueda de tickets por embeddings
-// ===============================
-async function searchTickets() {
-  const queryEl = document.getElementById("query");
-  const resultsDiv = document.getElementById("results");
 
-  const query = queryEl.value.trim();
-  resultsDiv.innerHTML = "";
+// app.js
+(() => {
+  const q = (sel) => document.querySelector(sel);
+  const escapeHTML = (str) => {
+    if (typeof str !== 'string') return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
+  };
 
-  if (!query) {
-    resultsDiv.textContent = "Por favor escribe una descripción del problema.";
-    return;
-  }
-
-  try {
-    const response = await fetch("/search", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: query,
-        top_k: 5, // número de tickets similares a mostrar
-      }),
-    });
-
-    if (!response.ok) {
-      resultsDiv.textContent =
-        "Error en la búsqueda (HTTP " + response.status + ").";
-      return;
-    }
-
-    const data = await response.json();
-
-    if (!data.results || data.results.length === 0) {
-      resultsDiv.textContent = "No se encontraron tickets similares.";
-      return;
-    }
-
-    // Crear tabla de resultados
-    const table = document.createElement("table");
-    table.classList.add("results-table");
-
-    const thead = document.createElement("thead");
-    thead.innerHTML = `
-      <tr>
-        <th>ID</th>
-        <th>Título</th>
-        <th>Categoría</th>
-        <th>Score</th>
-        <th>Descripción</th>
-      </tr>
-    `;
-    table.appendChild(thead);
-
-    const tbody = document.createElement("tbody");
-
-    data.results.forEach((item) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${item.id}</td>
-        <td>${item.title}</td>
-        <td>${item.category || "-"}</td>
-        <td>${item.score.toFixed(3)}</td>
-        <td>${item.description}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    table.appendChild(tbody);
-    resultsDiv.appendChild(table);
-  } catch (err) {
-    console.error(err);
-    resultsDiv.textContent = "Ocurrió un error al llamar a la API.";
-  }
-}
-
-// ===============================
-// Generar respuesta con Groq (LLM)
-// ===============================
-async function answerWithGroq() {
-  const queryEl = document.getElementById("query");
-  const resultsDiv = document.getElementById("results");
-  const answerDiv = document.getElementById("groqAnswer");
-
-  const query = queryEl.value.trim();
-  answerDiv.innerHTML = "";
-  resultsDiv.innerHTML = "";
-
-  if (!query) {
-    answerDiv.textContent = "Por favor escribe una descripción del problema.";
-    return;
-  }
-
-  try {
-    const response = await fetch("/answer_with_groq", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: query,
-        top_k: 5,
-      }),
-    });
-
-    const data = await response.json();
-    console.log("GROQ DATA:", data);
-
-    if (data.error) {
-      answerDiv.textContent = data.error;
-      return;
-    }
-
-    // Mostrar respuesta del LLM (Markdown → HTML)
-    if (data.answer) {
-      // marked viene del script CDN en index.html
-      answerDiv.innerHTML = marked.parse(data.answer);
+  const disable = (el, on) => { if (el) el.disabled = !!on; };
+  const setLoading = (el, isLoading, label='Cargando…') => {
+    if (!el) return;
+    if (isLoading) {
+      el.setAttribute('aria-busy','true');
+      el.innerHTML = `<div class="spinner" role="status" aria-live="polite">${label}</div>`;
     } else {
-      answerDiv.textContent = "No se recibió respuesta del modelo.";
+      el.removeAttribute('aria-busy');
     }
+  };
 
-    // Tabla con tickets usados como contexto
-    if (data.similar_tickets && data.similar_tickets.length > 0) {
-      const table = document.createElement("table");
-      table.classList.add("results-table");
-
-      const thead = document.createElement("thead");
-      thead.innerHTML = `
-        <tr>
-          <th>ID</th>
-          <th>Título</th>
-          <th>Categoría</th>
-          <th>Score</th>
-          <th>Descripción</th>
-        </tr>
-      `;
-      table.appendChild(thead);
-
-      const tbody = document.createElement("tbody");
-
-      data.similar_tickets.forEach((item) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${item.id}</td>
-          <td>${item.title}</td>
-          <td>${item.category || "-"}</td>
-          <td>${item.score.toFixed(3)}</td>
-          <td>${item.description}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      table.appendChild(tbody);
-      resultsDiv.appendChild(table);
+  const renderList = (container, items) => {
+    if (!Array.isArray(items) || items.length === 0) {
+      container.textContent = 'No se encontraron tickets similares.';
+      return;
     }
-  } catch (err) {
-    console.error(err);
-    answerDiv.textContent = "Ocurrió un error al llamar a la API de Groq.";
-  }
-}
+    const ul = document.createElement('ul');
+    ul.setAttribute('role','list');
+    items.forEach((item) => {
+      const id = escapeHTML(String(item.id ?? 'N/A'));
+      const title = escapeHTML(String(item.title ?? 'Sin título'));
+      const desc = escapeHTML(String(item.description ?? ''));
+      const score = (typeof item.score === 'number') ? item.score.toFixed(3) : '—';
+      const li = document.createElement('li');
+      li.innerHTML = `[#${id}] ${title} <small>(score: ${score})</small><br><div class="desc">${desc}</div>`;
+      ul.appendChild(li);
+    });
+    container.innerHTML = '';
+    container.appendChild(ul);
+  };
 
-// ===============================
-// Registro de eventos al cargar la página
-// ===============================
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("searchBtn");
-  btn.addEventListener("click", searchTickets);
-
-  const answerBtn = document.getElementById("answerBtn");
-  if (answerBtn) {
-    answerBtn.addEventListener("click", answerWithGroq);
+  async function postJSON(url, payload) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload ?? {}),
+    });
+    return res;
   }
-});
+
+  async function searchTickets() {
+    const resultsDiv = q('#results');
+    const searchBtn = q('#searchBtn');
+    const queryEl = q('#query');
+    const query = (queryEl?.value ?? '').trim();
+
+    resultsDiv.innerHTML = '';
+    if (!query) { resultsDiv.textContent = 'Por favor escribe una descripción del problema.'; queryEl?.focus(); return; }
+
+    setLoading(resultsDiv, true, 'Buscando tickets…');
+    disable(searchBtn, true);
+    try {
+      const res = await postJSON('/search', { query, top_k: 3 });
+      if (!res.ok) { resultsDiv.textContent = `Error (HTTP ${res.status}).`; return; }
+      const data = await res.json();
+      setLoading(resultsDiv, false);
+      renderList(resultsDiv, Array.isArray(data?.results) ? data.results : []);
+    } catch (e) {
+      console.error(e); setLoading(resultsDiv, false);
+      resultsDiv.textContent = 'Ocurrió un error al llamar a la API.';
+    } finally { disable(searchBtn, false); }
+  }
+
+  function answerWithGroqStream() {
+    const ans = q('#groqAnswer');
+    const resDiv = q('#results');
+    const btn = q('#answerBtn');
+    const queryEl = q('#query');
+    const query = (queryEl?.value ?? '').trim();
+
+    ans.textContent = '';
+    resDiv.innerHTML = '';
+    if (!query) { ans.textContent = 'Por favor escribe una descripción del problema.'; queryEl?.focus(); return; }
+
+    disable(btn, true); setLoading(ans, true, 'Consultando LLM (stream)…');
+
+    const es = new EventSourcePolyfill('/answer_with_groq_stream', {
+      payload: { query, top_k: 3 },
+    });
+
+    let metaHandled = false;
+    es.onmessage = (ev) => {
+      if (!metaHandled) { return; }
+      const chunk = ev.data;
+      if (!chunk) return;
+      if (/^ERROR:/.test(chunk)) {
+        setLoading(ans, false); ans.textContent = chunk; es.close(); disable(btn, false); return;
+      }
+      setLoading(ans, false);
+      ans.innerHTML += escapeHTML(chunk);
+    };
+    es.addEventListener('meta', (ev) => {
+      metaHandled = true;
+      try {
+        const meta = JSON.parse(ev.data);
+        renderList(resDiv, meta?.similar_tickets ?? []);
+      } catch (_) {}
+    });
+    es.addEventListener('done', () => { es.close(); disable(btn, false); });
+    es.onerror = (err) => { console.error(err); es.close(); disable(btn, false); setLoading(ans, false); ans.textContent = 'Error en stream.'; };
+  }
+
+  // Polyfill básico de SSE POST usando fetch + ReadableStream
+  class EventSourcePolyfill {
+    constructor(url, { payload }) {
+      this._listeners = {};
+      this.onmessage = null; this.onerror = null;
+      const encoder = new TextDecoder('utf-8');
+      fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const reader = res.body.getReader();
+          let buf = '';
+          const pump = () => reader.read().then(({done, value}) => {
+            if (done) { this._emit('done', ''); return; }
+            buf += encoder.decode(value, {stream:true});
+            const parts = buf.split('\n\n');
+            buf = parts.pop();
+            parts.forEach(block => {
+              const lines = block.split('\n');
+              let event = 'message'; let data = '';
+              lines.forEach(line => {
+                if (line.startsWith('event:')) event = line.slice(6).trim();
+                else if (line.startsWith('data:')) data += line.slice(5).trim();
+              });
+              if (event === 'message' && this.onmessage) this.onmessage({ data });
+              this._emit(event, data);
+            });
+            return pump();
+          }).catch(err => { if (this.onerror) this.onerror(err); });
+          return pump();
+        }).catch(err => { if (this.onerror) this.onerror(err); });
+    }
+    addEventListener(ev, cb){ (this._listeners[ev] ??= []).push(cb); }
+    _emit(ev, data){ (this._listeners[ev]||[]).forEach(cb => cb({ data })); }
+    close(){ /* fetch stream finalizará naturalmente */ }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchBtn = q('#searchBtn');
+    const answerBtn = q('#answerBtn');
+    searchBtn?.addEventListener('click', searchTickets);
+    answerBtn?.addEventListener('click', answerWithGroqStream);
+  });
+})();

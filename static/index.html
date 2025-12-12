@@ -1,25 +1,42 @@
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Buscador de tickets</title>
-  <link rel="stylesheet" href="/static/styles.css" />
+
+  <!-- Hoja de estilos -->
+  /static/styles.css
 </head>
 <body>
-  <h1>Buscador de tickets similares</h1>
+  <header>
+    <h1>Buscador de tickets similares</h1>
+  </header>
 
-  <label for="query">Describe tu problema:</label><br />
-  <textarea id="query" rows="4" cols="60"></textarea><br /><br />
+  <main>
+    <section aria-labelledby="query-label" class="query-section">
+      <label id="query-label" for="query">Describe tu problema:</label>
+      <textarea id="query" placeholder="Ej.: No puedo iniciar sesión en la app"></textarea>
 
-  <button id="searchBtn">Buscar tickets similares</button>
-  <button id="answerBtn">Generar respuestas con Groq</button>
+      <div class="actions">
+        <button id="searchBtn">Buscar tickets similares</button>
+        <button id="answerBtn">Generar respuesta (stream) con Groq</button>
+      </div>
+    </section>
 
-  <h2>Resultados</h2>
-  <div id="results"></div>
+    <section aria-labelledby="results-title" class="results-section">
+      <h3 id="results-title">Resultados</h3>
+      <div id="results" aria-live="polite"></div>
+    </section>
 
-  <h2>Respuesta sugerida por Groq</h2>
-  <div id="groqAnswer"></div>
-  <script src="https://cdn/jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="/static/app.js"></script>
+    <section aria-labelledby="groq-title" class="groq-section">
+      <h3 id="groq-title">Respuesta sugerida por Groq</h3>
+      <div id="groqAnswer" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <!-- Script principal -->
+  /static/app.js</script>
 </body>
 </html>
