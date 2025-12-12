@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="es">
 <head>
@@ -7,7 +6,7 @@
   <title>Buscador de tickets</title>
 
   <!-- Hoja de estilos -->
-  /static/styles.css
+  <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
   <header>
@@ -17,7 +16,10 @@
   <main>
     <section aria-labelledby="query-label" class="query-section">
       <label id="query-label" for="query">Describe tu problema:</label>
-      <textarea id="query" placeholder="Ej.: No puedo iniciar sesión en la app"></textarea>
+      <textarea
+        id="query"
+        placeholder="Ej.: No puedo iniciar sesión en la app"
+      ></textarea>
 
       <div class="actions">
         <button id="searchBtn">Buscar tickets similares</button>
@@ -37,6 +39,6 @@
   </main>
 
   <!-- Script principal -->
-  /static/app.js</script>
+  <script src="/static/app.js"></script>
 </body>
 </html>

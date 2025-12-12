@@ -1,5 +1,4 @@
-
-/* Fuente opcional (Inter o Nunito). Si prefieres Inter, descomenta la línea correspondiente */
+/* Fuente opcional (Inter). Si no tienes acceso a Google Fonts, puedes comentar la línea siguiente */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap");
 /* Alternativa:
 @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600&display=swap");
@@ -15,7 +14,9 @@
   --card-bg: #ffffff;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   /* Si activaste Inter arriba, usa 'Inter'; si prefieres Nunito, cámbialo aquí */
@@ -72,48 +73,62 @@ button {
   cursor: pointer;
 }
 
-button:hover { background-color: var(--primary-hover); }
-button:disabled { opacity: 0.6; cursor: not-allowed; }
+button:hover {
+  background-color: var(--primary-hover);
+}
 
-/* Contenedores de resultados y respuesta */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Contenedor de resultados */
 #results {
   min-height: 60px;
 }
 
-#results ul { padding-left: 20px; margin: 8px 0 0; }
-#results li { margin-bottom: 10px; }
-
-#groqAnswer {
-  margin-top: 10px;
-  padding: 12px;
-  background-color: var(--card-bg);
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  white-space: pre-wrap;
-}
-
-/* Opcional: tabla de resultados (si en el futuro formateas como tabla) */
+/* Tabla de resultados (búsqueda y tickets similares de Groq) */
 .results-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
   background-color: var(--card-bg);
 }
+
 .results-table th,
 .results-table td {
   border: 1px solid var(--border);
   padding: 8px;
   font-size: 14px;
+  vertical-align: top;
 }
+
 .results-table th {
-  background-color: #e3fdfd;
+  background-color: #e3f2fd;
   text-align: left;
 }
+
 .results-table tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-/* Secciones */
+/* Respuesta sugerida por Groq */
+#groqAnswer {
+  margin-top: 10px;
+}
+
+/* Bloque de texto para la respuesta del LLM (tabla Markdown) */
+.groq-output {
+  padding: 12px;
+  background-color: var(--card-bg);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  white-space: pre-wrap;
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+}
+
+/* Secciones (consulta, resultados, respuesta) */
 .query-section,
 .results-section,
 .groq-section {
@@ -124,7 +139,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   margin-bottom: 18px;
 }
 
-/* Spinner accesible (usado por app.js con aria-live) */
+/* Spinner accesible (usado por app.js con aria-busy) */
 .spinner {
   display: inline-block;
   width: 20px;
@@ -136,9 +151,14 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   vertical-align: middle;
   margin-right: 6px;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
 
-/* Mejoras de accesibilidad/ARIA */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mejoras de accesibilidad */
 [aria-busy="true"] {
   opacity: 0.85;
 }
